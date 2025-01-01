@@ -1,8 +1,8 @@
-import json
+
+import logging
 
 from flask import Flask, request, jsonify
 from kv_store.kv_service import KeyValueService
-import logging
 
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
@@ -38,6 +38,18 @@ def delete_entry(key):
 @app.route('/key-value/all-keys', methods=['GET'])
 def get_all_keys():
     return jsonify(kv_store.get_all_keys()), 200
+
+
+@app.route('/key-value/compaction', methods=['POST'])
+def run_file_compaction():
+    file_name = kv_store.compact_log_file()
+    return jsonify({"message": f"File {file_name} has been compacted"}), 200
+
+
+@app.route('/key-value/purge_kv', methods=['POST'])
+def purge_kv():
+    file_name = kv_store.purge_kv()
+    return jsonify({"message": f"KV Storage was purged for file {file_name}"}), 200
 
 
 if __name__ == '__main__':

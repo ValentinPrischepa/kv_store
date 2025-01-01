@@ -10,16 +10,20 @@ class LogFileManager:
 
     def write_entry(self, key, value):
         with open(self.file_path, 'ab') as log_file:
-            offset = log_file.tell()  # Get the current file offset
-            key_bytes = key.encode('utf-8')
-            value_bytes = value.encode('utf-8')
-            key_length_bytes = struct.pack('B', len(key_bytes))
-            value_length_bytes = struct.pack('H', len(value_bytes))
-            checksum = calculate_checksum(
-                ENTRY_MARKER + key_length_bytes + key_bytes + value_length_bytes + value_bytes)
-            log_entry = ENTRY_MARKER + key_length_bytes + key_bytes + value_length_bytes + value_bytes + checksum
-            log_file.write(log_entry)
-            return offset
+            return self.write_entry_to_file(key, value, log_file)
+
+    @staticmethod
+    def write_entry_to_file(key, value, log_file):
+        offset = log_file.tell()  # Get the current file offset
+        key_bytes = key.encode('utf-8')
+        value_bytes = value.encode('utf-8')
+        key_length_bytes = struct.pack('B', len(key_bytes))
+        value_length_bytes = struct.pack('H', len(value_bytes))
+        checksum = calculate_checksum(
+            ENTRY_MARKER + key_length_bytes + key_bytes + value_length_bytes + value_bytes)
+        log_entry = ENTRY_MARKER + key_length_bytes + key_bytes + value_length_bytes + value_bytes + checksum
+        log_file.write(log_entry)
+        return offset
 
     def write_tombstone(self, key):
         with open(self.file_path, 'ab') as log_file:
@@ -84,16 +88,10 @@ class LogFileManager:
                         if key is None:
                             break
                         if value is not None:
-                            new_offset = self.write_entry(key, value)
+                            new_offset = self.write_entry_to_file(key, value, new_log_file)
                             new_hash_map[key] = new_offset
                 except ValueError:
-                    raise ValueError('Compaction has failed')
+                    raise RuntimeError('Compaction has failed')
 
             os.rename(new_log_file_path, self.file_path)
             return new_hash_map
-
-
-
-
-
-
