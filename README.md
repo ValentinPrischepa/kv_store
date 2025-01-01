@@ -9,6 +9,10 @@ This repository contains a simple key-value store implemented in Python, designe
 - **Log File Compaction**: Periodically compacts the log file to remove obsolete entries.
 - **RESTful API**: Provides a Flask-based web interface for interacting with the store.
 
+## Benchmark
+- Write Throughput: 18667.23634551022 operations/second
+- Read Throughput: 85570.44871245598 operations/second
+
 ## Project Structure
 
 - `app.py`: The main Flask application.
