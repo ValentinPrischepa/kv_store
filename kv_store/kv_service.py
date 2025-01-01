@@ -32,6 +32,11 @@ class KeyValueService:
     def get_all_keys(self):
         return self.in_memory_hash_map_manager.get_all_keys()
 
+    def purge_kv(self):
+        open(LOG_FILE_PATH, 'w').close()
+        open(HASH_MAP_WAL_FILE, 'w').close()
+        self.in_memory_hash_map_manager.hash_map = {}
+
     def init_hash_map(self):
         with open(self.log_file_manager.file_path, 'rb') as log_file:
             next_offset = None
@@ -51,4 +56,5 @@ class KeyValueService:
     def compact_log_file(self):
         with self.lock:
             self.in_memory_hash_map_manager.hash_map = self.log_file_manager.compact_log_file(self.in_memory_hash_map_manager.hash_map)
+            return LOG_FILE_PATH
 
